@@ -19,29 +19,6 @@ public:
 
 // Node In a computation tree.
 
-
-// Class we are tracking.
-// Matrix for now.
-template<typename Type>
-class Variable {
-public:
-    using TypeValue = Type;
-    TypeValue mValue;
-    Variable(TypeValue value) : mValue(value) { }
-};
-
-template<typename Type>
-Variable<Type> operator+(const Variable<Type>& lhs, const Variable<Type>& rhs) {
-    Type result = lhs.mValue + rhs.mValue;
-    return Variable(result);
-}
-
-template<typename Type>
-Variable<Type> operator-(const Variable<Type>& lhs, const Variable<Type>& rhs) {
-    Type result = lhs.mValue - rhs.mValue;
-    return Variable(result);
-}
-
 template<typename T, int W, int H>
 class Matrix {
 public:

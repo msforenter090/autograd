@@ -8,5 +8,6 @@ int main() {
     auto taped_a = tape.variable(12);
     auto taped_b = tape.variable(12);
     auto taped_c = taped_a + taped_b;
+    taped_a.backtrace();
     return 0;
 }

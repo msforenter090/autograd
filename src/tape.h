@@ -9,7 +9,11 @@ namespace autograd {
     class Tape;
 
     class Node {
-        Node *parent;
+    public:
+        Node(Node *parent = nullptr) : mParent(parent) { }
+
+    public:
+        Node *mParent;
     };
 
     template<typename Type>
@@ -17,22 +21,30 @@ namespace autograd {
     public:
         using TypeValue = Type;
 
-        Variable(Tape &tape) : mTape(tape), mValue() { }
-        Variable(const Variable& other) : mTape(other.mTape), mValue() { }
+        Variable(Tape &tape, Node *node) : mTape(tape), mNode(node), mValue() { }
+        Variable(const Variable &other) : mTape(other.mTape), mValue() { }
 
         friend Variable<Type> operator+(const Variable<Type> &lhs, const Variable<Type> &rhs) {
             Type result = lhs.mValue + rhs.mValue;
-            return Variable(lhs.mTape);
+            auto newNode = new Node();
+            lhs.mNode->mParent = newNode;
+            rhs.mNode->mParent = newNode;
+            lhs.mTape.push_back(newNode);
+            return Variable(lhs.mTape, newNode);
         }
 
         friend Variable<Type> operator-(const Variable<Type> &lhs, const Variable<Type> &rhs) {
             Type result = lhs.mValue - rhs.mValue;
-            return Variable(lhs.mTape);
+            auto newNode = new Node();
+            lhs.mNode->mParent = newNode;
+            rhs.mNode->mParent = newNode;
+            return Variable(lhs.mTape, newNode);
         }
 
     private:
-        TypeValue mValue;
         Tape &mTape;
+        Node *mNode;
+        TypeValue mValue;
     };
 
 
@@ -42,12 +54,9 @@ namespace autograd {
 
         template<typename T>
         Variable<T> variable(const T& value) {
-            return Variable<T>(*this);
-        }
-
-        void push_back(Node *node) {
-            mTape.emplace_back(node);
-            std::cout << "Hello" << std::endl;
+            auto newNode = new Node();
+            mTape.push_back(newNode);
+            return Variable<T>(*this, newNode);
         }
 
     private:

@@ -1,4 +1,5 @@
 #include <vector>
+#include <stdexcept>
 #include <iostream>
 
 namespace autograd {
@@ -23,11 +24,19 @@ namespace autograd {
     template<typename Type>
     class Variable {
     public:
-        Variable(Tape &tape, Node *node) : mTape(tape), mNode(node), mValue() { }
+        using TypeValue = Type;
+        using Reference = TypeValue&;
+        using Pointer = Type*;
+
+        template<typename... Args>
+        Variable(Tape &tape, Node *node, Args&& ...args) : mTape(tape), mNode(node), mValue(std::forward<Args>(args)...) { }
+        Variable(Tape &tape, Node *node, TypeValue&& other) : mTape(tape), mNode(node), mValue(std::forward<TypeValue>(other)) { }
+
+        Reference operator*() { return mValue; }
 
         // This tells the compiler this friend is a template specialization.
-        friend Variable<Type> operator+ <Type>(const Variable<Type>&, const Variable<Type>&);
-        friend Variable<Type> operator- <Type>(const Variable<Type>&, const Variable<Type>&);
+        friend Variable<TypeValue> operator+<TypeValue>(const Variable<TypeValue>&, const Variable<TypeValue>&);
+        friend Variable<TypeValue> operator-<TypeValue>(const Variable<TypeValue>&, const Variable<TypeValue>&);
 
         void backtrace() {
             while(mNode != nullptr) {
@@ -39,7 +48,7 @@ namespace autograd {
     private:
         Tape &mTape;
         Node *mNode;
-        Type mValue;
+        TypeValue mValue;
     };
 
     class Tape {
@@ -48,11 +57,11 @@ namespace autograd {
             mTape.push_back(n);
         }
 
-        template<typename T>
-        Variable<T> variable(const T& value) {
+        template<typename Type, typename...Args>
+        Variable<Type> variable(Args&& ...args) {
             auto newNode = new Node();
             mTape.push_back(newNode);
-            return Variable<T>(*this, newNode);
+            return Variable<Type>(*this, newNode, std::forward<Args>(args)...);
         }
 
     private:
@@ -61,6 +70,10 @@ namespace autograd {
 
     template<typename Type>
     Variable<Type> operator+(const Variable<Type> &lhs, const Variable<Type> &rhs) {
+        if(&lhs.mTape != &rhs.mTape) {
+            throw std::runtime_error("Different tape object.");
+        }
+
         auto newNode = new Node();
         auto result = lhs.mValue + rhs.mValue;
 
@@ -68,11 +81,15 @@ namespace autograd {
         rhs.mNode->mParent = newNode;
         lhs.mTape.push_back(newNode);
 
-        return Variable<Type>(lhs.mTape, newNode);
+        return Variable<Type>(lhs.mTape, newNode, result);
     }
 
     template<typename Type>
     Variable<Type> operator-(const Variable<Type> &lhs, const Variable<Type> &rhs) {
+        if(&lhs.mTape != &rhs.mTape) {
+            throw std::runtime_error("Different tape object.");
+        }
+
         auto newNode = new Node();
         auto result = lhs.mValue - rhs.mValue;
 
@@ -80,6 +97,6 @@ namespace autograd {
         rhs.mNode->mParent = newNode;
         lhs.mTape.push_back(newNode);
 
-        return Variable<Type>(lhs.mTape, newNode);
+        return Variable<Type>(lhs.mTape, newNode, result);
     }
 }

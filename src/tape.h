@@ -2,6 +2,8 @@
 #include <stdexcept>
 #include <iostream>
 
+#include "derivs.h"
+
 namespace autograd {
     class Node;
     class Tape;
@@ -57,7 +59,7 @@ namespace autograd {
             mTape.push_back(n);
         }
 
-        template<typename Type, typename...Args>
+        template<typename Type, typename... Args>
         Variable<Type> variable(Args&& ...args) {
             auto newNode = new Node();
             mTape.push_back(newNode);
@@ -80,6 +82,8 @@ namespace autograd {
         lhs.mNode->mParent = newNode;
         rhs.mNode->mParent = newNode;
         lhs.mTape.push_back(newNode);
+
+        auto iden = identity<Type>(3, 3);
 
         return Variable<Type>(lhs.mTape, newNode, result);
     }

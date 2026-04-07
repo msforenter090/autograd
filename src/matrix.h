@@ -1,25 +1,25 @@
 #pragma once
-
 #include <cstring>
+#include <memory>
 
 template<typename Type>
-class Matrix {
+class MatrixImplementation {
 public:
     using TypeValue = Type;
     using Reference = TypeValue&;
     using Pointer = TypeValue*;
 
-    Matrix(int width, int height) : mWidth(width), mHeight(height), mData(nullptr) {
+    MatrixImplementation(int width, int height) : mWidth(width), mHeight(height), mData(nullptr) {
         mData = new TypeValue[mWidth * mHeight];
     }
 
-    Matrix(const Matrix<TypeValue> &other) : mWidth(other.mWidth), mHeight(other.mHeight) {
+    MatrixImplementation(const MatrixImplementation<TypeValue> &other) : mWidth(other.mWidth), mHeight(other.mHeight) {
         mData = new TypeValue[mWidth * mHeight];
         // assume same dimensions and this and rhs are not the same object
         std::memcpy(mData, other.mData, sizeof(TypeValue) * other.mWidth * other.mHeight);
     }
 
-    Matrix<TypeValue>& operator=(const Matrix<TypeValue> &rhs) {
+    MatrixImplementation<TypeValue>& operator=(const MatrixImplementation<TypeValue> &rhs) {
         // assume same dimensions and this and rhs are not the same object
         std::memcpy(mData, rhs.mData, sizeof(TypeValue) * mWidth * mHeight);
         return *this;
@@ -30,7 +30,7 @@ public:
         return mData[i * mWidth + j];
     }
 
-    ~Matrix() {
+    ~MatrixImplementation() {
         delete mData;
         mData = nullptr;
     }
@@ -45,12 +45,11 @@ private:
 };
 
 template<typename T>
-Matrix<T> operator+(const Matrix<T> &lhs, const Matrix<T> &rhs) {
-    return Matrix<T>(lhs.width(), lhs.height());
+MatrixImplementation<T> operator+(const MatrixImplementation<T> &lhs, const MatrixImplementation<T> &rhs) {
+    return MatrixImplementation<T>(lhs.width(), lhs.height());
 }
 
 template<typename T>
-Matrix<T> operator-(const Matrix<T> &lhs, const Matrix<T> &rhs) {
-    return Matrix<T>(lhs.width(), lhs.height());
+MatrixImplementation<T> operator-(const MatrixImplementation<T> &lhs, const MatrixImplementation<T> &rhs) {
+    return MatrixImplementation<T>(lhs.width(), lhs.height());
 }
-

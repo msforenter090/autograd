@@ -1,0 +1,351 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\usepackage{amssymb}
+
+\newcommand{\var}[1]{\mathnormal{#1}}
+\newcommand{\varsuvar}[2]{\mathnormal{#1}_\mathnormal{#2}}
+
+\title{Backpropagation in a Single Neuron - Episode 1}
+\author{Milan Stanarevic}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagatin - Prerequisites}
+  We will need few math elements / concepts (High School Level)
+  \begin{itemize}
+    \item Simple and Complex function Derivative
+    \item Substitution / Chain Rule Derivative
+    \item And two other thing I will not mention here (comes later)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Refresher - Simple and Complex function Derivative}
+  We will not delve in the definition of Derivative, that does hold our interest and does not bring us closer to our goal.
+  \vspace{0.5cm}
+  \begin{itemize}
+    \item Simple function derivative
+      \begin{gather}
+        \var{f(x) = x^3 \Rightarrow \frac{d(x^3)}{dx} = 3x^2} \\
+        \var{f(x) = 5x+N \Rightarrow \frac{d(5x+N)}{dx} = 5}
+      \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Refresher - Simple and Complex function Derivative}
+  \begin{itemize}
+    \item Complex function derivative and Chain Rule
+      \begin{gather}
+        \var{f(x) = (ln(x) + sin(x)^3} \\
+        \var{u = ln(x) + sin(x)} \\
+        \var{f(u) = u^3} \\
+        \var{\frac{\partial f(x)}{\partial x} = \frac{\partial f(u)}{\partial u} \frac{\partial u}{\partial x}} \\
+        \var{\frac{\partial f(x)}{\partial x} = 3u^2 * (\frac{1}{x} - cos(x))} \\
+        \var{\frac{\partial f(x)}{\partial x} = 3(ln(x) + sin(x))^2 * (\frac{1}{x} - cos(x))}
+      \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Standard Neuron Model}
+  \begin{figure}[h] % [h] = "here"
+  \centering
+  \includegraphics[width=1\textwidth]{images/snm.png}
+  \caption{Standard Neuron Model}
+  \label{fig:snm}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Weighted Input and Activation Function}
+    \begin{gather}
+      \var{z} : \mathbb{R}^{\var{n}} \to \mathbb{R} \\
+      \var{z} = \sum_{\var{i}=1}^{\var{n}} \varsuvar{x}{i}\varsuvar{w}{i}  \\
+      \var{a} : \mathbb{R} \to \mathbb{R} \\
+      \var{a} = \frac{1}{1 + \var{e}^{\var{-z}}}
+    \end{gather}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Analytical Model \& Problem}
+  \begin{gather}
+    \var{a(z(\overline{x})) \Rightarrow z \circ a} \\
+    \var{a = \frac{1}{1 + e^{-(x_1 w_1 + x_2 w_2 + x_3 w_3)}}}
+  \end{gather}
+  \begin{itemize}
+    \item Backpropagation is supervised algorithm.
+    \item How to find $\varsuvar{w}{i}$?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Model \& Problem}
+  Support structure:
+  \begin{itemize}
+    \item Measure of error / difference in output and target value.
+      \begin{gather}
+        \var{C = \frac{1}{2}\sum_{i = 1}^{n} (T_i - a_i)^2}
+      \end{gather}
+    \item Using gradient descent:
+      \begin{gather}
+        \var{w_{new} \leftarrow w_{old} - \eta \nabla C}
+      \end{gather}
+    \item Where $\eta$ is the learning rate
+    \item Where $\nabla$ is a vector differential operator
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Putting it all together}
+  \begin{itemize}
+    \item Cost / Loss function
+      \begin{gather}
+        \var{C = \frac{1}{2} (T - \frac{1}{1 + e^{-(x_1 w_1 + x_2 w_2 + x_3 w_3)}})^2} \\
+        \var{C = \frac{1}{2} (T - \frac{1}{1 + e^{-z}})^2} \\
+        \var{C = \frac{1}{2} (T - a)^2}
+      \end{gather}
+    \item Nector of differential operators
+      \[
+        \nabla =
+          \begin{bmatrix}
+            \var{\frac{\partial{}}{\partial x_1}} \\[0.5em]
+            \var{\frac{\partial{}}{\partial x_2}} \\[0.5em]
+            \var{\frac{\partial{}}{\partial x_3}}
+          \end{bmatrix}
+        \nabla C =
+          \begin{bmatrix}
+            \var{\frac{\partial{C}}{\partial w_1}} \\[0.5em]
+            \var{\frac{\partial{C}}{\partial w_2}} \\[0.5em]
+            \var{\frac{\partial{C}}{\partial w_3}}
+          \end{bmatrix}
+      \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Putting it all together}
+  \begin{itemize}
+    \item Partial derivatives
+      \begin{gather}
+        \var{\frac{\partial C}{\partial w_1} = \frac{\partial C}{\partial a}\frac{\partial a}{\partial z}\frac{\partial z}{\partial w_1}} \\
+        \var{\frac{\partial C}{\partial w_2} = \frac{\partial C}{\partial a}\frac{\partial a}{\partial z}\frac{\partial z}{\partial w_2}} \\
+        \var{\frac{\partial C}{\partial w_3} = \frac{\partial C}{\partial a}\frac{\partial a}{\partial z}\frac{\partial z}{\partial w_3}}
+      \end{gather}
+   \item Common term
+     \begin{gather}
+       \var{\delta = \frac{\partial C}{\partial a}\frac{\partial a}{\partial z}} \\
+       \var{\frac{\partial C}{\partial w_i} = \delta \frac{\partial z}{\partial w_i}}
+     \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Putting it all together}
+  \begin{itemize}
+    \item Partial derivatives
+      \begin{gather}
+        \var{\frac{\partial C}{\partial a} = (a - T)} \\
+        \var{\frac{\partial a}{\partial z} = a(1-a)} \\
+        \var{\frac{\partial z}{\partial w_i} = x_i}
+      \end{gather}
+   \item Common term
+     \begin{gather}
+       \var{\delta = \frac{\partial C}{\partial a}\frac{\partial a}{\partial z} \Rightarrow (a - T) a (1 - a)} \\
+       \var{\frac{\partial C}{\partial w_i} = \delta \frac{\partial z}{\partial w_i} \Rightarrow \delta x_i}
+     \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation - Putting it all together}
+  \begin{itemize}
+    \item Vector of differential operators
+      \[
+        \nabla C = \delta
+          \begin{bmatrix}
+            \var{x_1} \\[0.5em]
+            \var{x_2} \\[0.5em]
+            \var{x_3}
+          \end{bmatrix}
+      \]
+    \item Gradient descent
+      \begin{gather}
+        \var{w}_{\var{new}} \leftarrow \var{w}_{\var{old}} - \eta \delta
+          \begin{bmatrix}
+            \var{x_1} \\
+            \var{x_2} \\
+            \var{x_3}
+          \end{bmatrix}
+      \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Example: Sigmoid Function}
+  \frametitle{Backpropagation - Putting it all together - Pseudocode}
+\end{frame}
+
+\title{Backpropagation in a Multi layer Neuron Network with focus on depth - Episode 2}
+\date{\today}
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Agenda}
+  \begin{itemize}
+    \item We already know how to backpropagate through a single neuron.
+    \item We will learn how to backpropagate through a multi layer neuron network (no width, just depth).
+    \item We already introduced all the necessary concepts and math elements in the previous episode.
+    \begin{itemize}
+      \item Partial derivatives
+      \item Chain Rule
+      \item Gradient descent (SGD)
+      \item Cost / Loss function (MSE)
+      \item Vector of differential operators (nabla, $\eta$)
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Agenda}
+  \begin{figure}[h] % [h] = "here"
+    \centering
+    \includegraphics[width=1\textwidth]{images/snm.png}
+    \caption{Standard Neuron Model}
+    \label{fig:placeholder}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Strategy}
+  \begin{itemize} 
+    \item Apply chain rule to find derivatives for each weight in the network, use MSE as a Loss function (no biases).
+    \item Apply gradient descent to update the weights of the network.
+    \item Feed forward to get the output of the network.
+    \item Check if the output is close to the target value.
+    \item If not,go back to step 1.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Gradient Descent}
+  \begin{itemize}
+    \item Derivative of the Cost function with respect to the weights
+    \begin{gather}
+      \var{\frac{\partial C}{\partial w_2}} \\
+      \var{\frac{\partial C}{\partial w_1}} \\
+      \var{\frac{\partial C}{\partial w_{00}}}, \var{\frac{\partial C}{\partial w_{01}}}, \var{\frac{\partial C}{\partial w_{02}}}
+    \end{gather}
+    \item Gradient descent
+    \begin{gather}
+      \var{w}_{\var{new}} \leftarrow \var{w}_{\var{old}} - \eta \nabla C
+    \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Gradient Descent}
+  \begin{itemize}
+    \item Gradient descent
+    \begin{gather}
+        \var{\frac{\partial C}{\partial w_2}} = \var{\frac{\partial C}{\partial a_2}} \var{\frac{\partial a_2}{\partial z_2}} \var{\frac{\partial z_2}{\partial w_2}} \\
+        \var{\frac{\partial C}{\partial w_1}} = \var{\frac{\partial C}{\partial a_2}} \var{\frac{\partial a_2}{\partial z_2}} \var{\frac{\partial z_2}{\partial a_1}} \var{\frac{\partial a_1}{\partial z_1}} \var{\frac{\partial z_1}{\partial w_1}} \\
+        \var{\frac{\partial C}{\partial w_{00}}} = \var{\frac{\partial C}{\partial a_2}} \var{\frac{\partial a_2}{\partial z_2}} \var{\frac{\partial z_2}{\partial a_1}} \var{\frac{\partial a_1}{\partial z_1}} \var{\frac{\partial z_1}{\partial a_{0}}} \var{\frac{\partial a_{0}}{\partial z_{0}}} \var{\frac{\partial z_{0}}{\partial w_{00}}} \\
+        \var{\frac{\partial C}{\partial w_{01}}} = \var{\frac{\partial C}{\partial a_2}} \var{\frac{\partial a_2}{\partial z_2}} \var{\frac{\partial z_2}{\partial a_1}} \var{\frac{\partial a_1}{\partial z_1}} \var{\frac{\partial z_1}{\partial a_{0}}} \var{\frac{\partial a_{0}}{\partial z_{0}}} \var{\frac{\partial z_{0}}{\partial w_{01}}} \\
+        \var{\frac{\partial C}{\partial w_{02}}} = \var{\frac{\partial C}{\partial a_2}} \var{\frac{\partial a_2}{\partial z_2}} \var{\frac{\partial z_2}{\partial a_1}} \var{\frac{\partial a_1}{\partial z_1}} \var{\frac{\partial z_1}{\partial a_{0}}} \var{\frac{\partial a_{0}}{\partial z_{0}}} \var{\frac{\partial z_{0}}{\partial w_{02}}}
+    \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Gradient Descent}
+  \begin{itemize}
+    \item Substitution with layer deltas
+    \begin{gather}
+      \var{\delta_2 = \frac{\partial C}{\partial a_2}\frac{\partial a_2}{\partial z_2}} \\
+      \var{\delta_1 = \delta_2\frac{\partial z_2}{\partial a_1}\frac{\partial a_1}{\partial z_1}} \\
+      \var{\delta_0 = \delta_1\frac{\partial z_1}{\partial a_0}\frac{\partial a_0}{\partial z_0}}
+    \end{gather}
+    \item Compact derivatives per layer
+    \begin{gather}
+      \var{\frac{\partial C}{\partial w_2} = \delta_2\frac{\partial z_2}{\partial w_2}} \\
+      \var{\frac{\partial C}{\partial w_1} = \delta_1\frac{\partial z_1}{\partial w_1}} \\
+      \var{\frac{\partial C}{\partial w_{00}} = \delta_0\frac{\partial z_0}{\partial w_{00}}},\;
+      \var{\frac{\partial C}{\partial w_{01}} = \delta_0\frac{\partial z_0}{\partial w_{01}}},\;
+      \var{\frac{\partial C}{\partial w_{02}} = \delta_0\frac{\partial z_0}{\partial w_{02}}}
+    \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Gradient Descent}
+  \begin{itemize}
+    \item Replace each derivative with its equivalent form
+    \begin{gather}
+      \var{\delta_2 = (a_2 - T)a_2(1-a_2)} \\
+      \var{\delta_1 = \delta_2 w_2 a_1(1-a_1)} \\
+      \var{\delta_0 = \delta_1 w_1 a_0(1-a_0)}
+    \end{gather}
+    \item Final gradients
+    \begin{gather}
+      \var{\frac{\partial C}{\partial w_2} = \delta_2 a_1} \\
+      \var{\frac{\partial C}{\partial w_1} = \delta_1 a_0} \\
+      \var{\frac{\partial C}{\partial w_{00}} = \delta_0 w_{00}},\;
+      \var{\frac{\partial C}{\partial w_{01}} = \delta_0 w_{01}},\;
+      \var{\frac{\partial C}{\partial w_{02}} = \delta_0 w_{02}}
+    \end{gather}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Gradient Descent}
+  \begin{itemize}
+    \item Gradient descent update rule
+    \begin{gather}
+      \var{w_{new} \leftarrow w_{old} - \eta \nabla C}
+    \end{gather}
+    \item Apply to each weight
+    \begin{gather}
+      \var{w_2 \leftarrow w_2 - \eta \delta_2 a_1} \\
+      \var{w_1 \leftarrow w_1 - \eta \delta_1 a_0} \\
+      \var{w_{00} \leftarrow w_{00} - \eta \delta_0 i_0},\;
+      \var{w_{01} \leftarrow w_{01} - \eta \delta_0 i_1},\;
+      \var{w_{02} \leftarrow w_{02} - \eta \delta_0 i_2}
+    \end{gather}
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Backpropagation in a Multi layer Neuron Network: Pseudocode}
+  \begin{verbatim}
+error = infinity
+(i0, i1, i2, T) = sample()
+while error > epsilon:
+  # run model once and keep intermediates for backprop
+  (a0, a1, a2) = forward(i0, i1, i2, w00, w01, w02, w1, w2)
+
+  # backpropagation (training focus)
+  delta2 = (a2 - T) * a2 * (1 - a2)
+  delta1 = delta2 * w2 * a1 * (1 - a1)
+  delta0 = delta1 * w1 * a0 * (1 - a0)
+
+  # gradient descent weight updates
+  w2  = w2  - eta * delta2 * a1
+  w1  = w1  - eta * delta1 * a0
+  w00 = w00 - eta * delta0 * i0
+  w01 = w01 - eta * delta0 * i1
+  w02 = w02 - eta * delta0 * i2
+
+  # per-iteration error (no batch)
+  error = 0.5 * (T - a2)^2
+  \end{verbatim}
+\end{frame}
+\end{document}
